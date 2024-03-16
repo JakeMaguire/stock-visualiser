@@ -1,5 +1,6 @@
 import { Edge, Node } from "reactflow";
 import { getNodes } from "./NodeApi";
+import { groupBy } from "lodash";
 
 type MoveTypes =
   | "goodsIn"
@@ -35,8 +36,20 @@ export type GetNodesResponse = {
   time: string;
 };
 
+export type NodeData = {
+  siteId?: number;
+  siteName?: string;
+  hub?: number | null;
+  location?: string;
+  moveType: string;
+  emoji?: string;
+  time: string;
+  wasBrokenDown: boolean;
+};
+
 type Site = {
   siteId: number;
+  siteName: string;
   nodeId: string;
 };
 
@@ -54,113 +67,120 @@ const typeEmojiMapper = {
   palletMove: "📦📦",
 } as const;
 
-export const convertToNodes = (): NodesAndEdges => {
+export const getNodesAndEdges = (): NodesAndEdges => {
   const response = getNodes();
 
-  let yPosition = 50;
-  let groupXPosition = 300;
   let sites: Site[] = [];
-  let transformedNodes: Node[] = [];
+  let deliveryNodes: Node[] = [];
+  let moveNodes: Node[] = [];
   let edges: Edge[] = [];
   let prevNodeId: string;
 
   response.forEach((node) => {
-    // If location from is undefined we assume it is a delivery
-    if (node.type === "delivery") {
-      const transformedNode = constructDeliveryNode(node, 150);
+    switch (node.type) {
+      case "delivery":
+        const deliveryNode = constructDeliveryNode(node);
 
-      if (prevNodeId) {
-        const edge = constructEdge(prevNodeId, transformedNode.id);
-        edges.push(edge);
-      }
-      prevNodeId = transformedNode.id;
-      transformedNodes.push(transformedNode);
+        if (prevNodeId) {
+          const edge = constructEdge(prevNodeId, deliveryNode.id);
+          edges.push(edge);
+        }
 
-      return;
-    }
+        prevNodeId = deliveryNode.id;
+        deliveryNodes.push(deliveryNode);
 
-    if (node.type === "goodsIn") {
-      if (node.locationTo && isNewSite(sites, node)) {
-        const nodeId = `site-${node.locationTo.siteId}`;
-        const groupNode = constructGroupNode(nodeId, node, groupXPosition);
+      default:
+        if (node.locationTo && isNewSite(sites, node)) {
+          const nodeId = `site-${node.locationTo.siteId}`;
 
-        transformedNodes.push(groupNode);
-        sites.push({
-          siteId: node.locationTo.siteId,
-          nodeId,
-        });
+          sites.push({
+            siteId: node.locationTo.siteId,
+            siteName: node.locationTo.siteName,
+            nodeId,
+          });
+        }
 
-        groupXPosition += 400;
-      }
+        const moveNode = constructNode(node);
+        moveNodes.push(moveNode);
 
-      const parentNode = sites.find(
-        (site) => site.siteId === node.locationTo?.siteId
-      );
+        if (prevNodeId) {
+          const edge = constructEdge(prevNodeId, moveNode.id);
+          edges.push(edge);
+        }
 
-      const transformedNode = constructNode(
-        node,
-        yPosition,
-        parentNode?.nodeId
-      );
-      transformedNodes.push(transformedNode);
-
-      if (prevNodeId) {
-        const edge = constructEdge(prevNodeId, transformedNode.id);
-        edges.push(edge);
-      }
-
-      prevNodeId = transformedNode.id;
-
-      yPosition += 120;
-      return;
-    } else if (node.locationTo) {
-      if (isNewSite(sites, node)) {
-        const nodeId = `site-${node.locationTo.siteId}`;
-        const groupNode = constructGroupNode(nodeId, node, groupXPosition);
-
-        transformedNodes.push(groupNode);
-        sites.push({
-          siteId: node.locationTo.siteId,
-          nodeId,
-        });
-        groupXPosition += 400;
-        yPosition = 50;
-      }
-
-      const parentNode = sites.find(
-        (site) => site.siteId === node.locationTo?.siteId
-      );
-
-      const transformedNode = constructNode(
-        node,
-        yPosition,
-        parentNode?.nodeId
-      );
-      transformedNodes.push(transformedNode);
-
-      if (prevNodeId) {
-        const edge = constructEdge(prevNodeId, transformedNode.id);
-        edges.push(edge);
-      }
-
-      prevNodeId = transformedNode.id;
-      yPosition += 120;
-      return;
+        prevNodeId = moveNode.id;
     }
   });
 
-  return { nodes: transformedNodes, edges };
+  const repositionedNodes = positionNodes(sites, deliveryNodes, moveNodes);
+
+  return { nodes: repositionedNodes, edges };
+};
+
+const positionNodes = (
+  sites: Site[],
+  deliveryNodes: Node[],
+  moveNodes: Node[]
+): Node[] => {
+  const transformedNodes: Node[] = [];
+
+  // Get Delivery Nodes and Position Them
+  let deliveryYPosition = 0;
+  deliveryNodes.forEach((node) => {
+    if (node.type === "delivery") {
+      node.position = {
+        x: 0,
+        y: deliveryYPosition,
+      };
+
+      deliveryYPosition += 100;
+    }
+
+    transformedNodes.push(node);
+  });
+
+  // Get Sites and construct Group Nodes
+  const groupedNodes = groupBy(moveNodes, "data.siteId");
+
+  let siteXPosition = 250;
+  sites.forEach((site) => {
+    const groupNode = constructGroupNode(
+      site.nodeId,
+      site.siteName,
+      siteXPosition
+    );
+    transformedNodes.push(groupNode);
+
+    // Get Nodes for each site and position them
+    const nodes = groupedNodes[site.siteId];
+    if (nodes) {
+      let yPosition = 40;
+      nodes.forEach((node) => {
+        node.position = {
+          x: 20,
+          y: yPosition,
+        };
+        node.parentNode = site.nodeId;
+        node.zIndex = 1;
+        yPosition += 110;
+      });
+
+      transformedNodes.push(...nodes);
+    }
+  });
+
+  return transformedNodes;
 };
 
 const constructGroupNode = (
   id: string,
-  node: GetNodesResponse,
+  label: string,
   groupXPosition: number
-) => {
+): Node => {
   return {
     id,
-    data: { label: node.locationTo?.siteName },
-    position: { x: groupXPosition, y: 100 },
+    data: { label },
+    position: { x: groupXPosition, y: 0 },
     className: "light",
     style: { width: 300, height: 500 },
     // type: "group",
@@ -169,13 +189,12 @@ const constructGroupNode = (
 
 const constructDeliveryNode = (
   node: GetNodesResponse,
-  yPosition: number,
   parentNodeId?: string
-) => {
+): Node => {
   return {
     id: node.id.toString(),
     type: "delivery",
-    position: { x: 10, y: yPosition },
+    position: { x: 0, y: 0 },
     data: {
       deliveryId: node.id,
       emoji: typeEmojiMapper[node.type],
@@ -187,14 +206,15 @@ const constructDeliveryNode = (
 
 const constructNode = (
   node: GetNodesResponse,
-  yPosition: number,
   parentNodeId?: string
-): Node => {
+): Node<NodeData> => {
   return {
     id: node.id.toString(),
     type: "custom",
-    position: { x: 10, y: yPosition },
+    position: { x: 0, y: 0 },
     data: {
+      siteId: node.locationTo?.siteId,
+      siteName: node.locationTo?.siteName,
       hub: node.locationTo?.hub,
       location: node.locationTo?.name,
       moveType: node.type,

@@ -188,5 +188,30 @@ export const getNodes = (): GetNodesResponse[] => {
       user: "Jake Maguire",
       time: "2023-10-01 10:10:00",
     },
+    {
+      id: 9,
+      caseId: 123,
+      caseLabel: "CAS2414",
+      locationFrom: {
+        id: 4,
+        name: "M934",
+        hub: 4535,
+        siteId: 2,
+        siteName: "MA001 (Madrid, ES)",
+        type: 4,
+      },
+      locationTo: {
+        id: 4,
+        name: "H734 - Shelf",
+        hub: 4535,
+        siteId: 3,
+        siteName: "JAKELAND",
+        type: 4,
+      },
+      type: "bookIn",
+      quantity: 23234,
+      user: "Jake Maguire",
+      time: "2023-10-01 10:10:00",
+    },
   ];
 };

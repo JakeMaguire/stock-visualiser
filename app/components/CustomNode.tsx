@@ -1,18 +1,8 @@
 import React, { memo } from "react";
 import { Handle, Position } from "reactflow";
+import { NodeData } from "../services/NodeService";
 
-export type Data = {
-  data: {
-    hub?: number;
-    location: string;
-    moveType: string;
-    emoji?: string;
-    time: string;
-    wasBrokenDown: boolean;
-  };
-};
-
-const CustomNode = ({ data }: Data) => {
+const CustomNode = ({ data }: NodeData) => {
   return (
     <div>
       <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
