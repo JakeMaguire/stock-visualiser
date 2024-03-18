@@ -17,14 +17,7 @@ export const getNodes = (): GetNodesResponse[] => {
       id: 2,
       caseId: 123,
       caseLabel: "CAS2414",
-      locationFrom: {
-        id: 1,
-        name: "A012",
-        hub: 2027,
-        siteId: 1,
-        siteName: "CH001 (Chippenham, UK)",
-        type: 4,
-      },
+      locationFrom: null,
       locationTo: {
         id: 2,
         name: "A047",
@@ -43,7 +36,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 1,
+        id: 2,
         name: "A047",
         hub: 3024,
         siteId: 1,
@@ -51,7 +44,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 2,
+        id: 3,
         name: "B389",
         hub: 4023,
         siteId: 1,
@@ -68,7 +61,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 2,
+        id: 3,
         name: "B389",
         hub: 4023,
         siteId: 1,
@@ -76,7 +69,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 2,
+        id: 4,
         name: "B345",
         hub: 4023,
         siteId: 1,
@@ -93,7 +86,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 2,
+        id: 4,
         name: "B389",
         hub: 4023,
         siteId: 1,
@@ -101,7 +94,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 2,
+        id: 5,
         name: "B345",
         hub: 4023,
         siteId: 1,
@@ -118,7 +111,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 3,
+        id: 5,
         name: "B389",
         hub: 4023,
         siteId: 1,
@@ -126,7 +119,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 4,
+        id: 6,
         name: "L382",
         hub: 8923,
         siteId: 2,
@@ -143,7 +136,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 4,
+        id: 6,
         name: "L382",
         hub: 8923,
         siteId: 2,
@@ -151,7 +144,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 4,
+        id: 7,
         name: "M934",
         hub: 4535,
         siteId: 2,
@@ -168,7 +161,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 4,
+        id: 7,
         name: "M934",
         hub: 4535,
         siteId: 2,
@@ -176,7 +169,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 4,
+        id: 8,
         name: "H734 - Shelf",
         hub: 4535,
         siteId: 2,
@@ -193,7 +186,7 @@ export const getNodes = (): GetNodesResponse[] => {
       caseId: 123,
       caseLabel: "CAS2414",
       locationFrom: {
-        id: 4,
+        id: 8,
         name: "M934",
         hub: 4535,
         siteId: 2,
@@ -201,7 +194,7 @@ export const getNodes = (): GetNodesResponse[] => {
         type: 4,
       },
       locationTo: {
-        id: 4,
+        id: 9,
         name: "H734 - Shelf",
         hub: 4535,
         siteId: 3,

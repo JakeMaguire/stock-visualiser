@@ -1,23 +1,13 @@
 "use client";
 
-import ReactFlow, {
-  Controls,
-  Background,
-  useNodesState,
-  useNodes,
-  useNodesInitialized,
-  useReactFlow,
-  getNodesBounds,
-  FitViewOptions,
-} from "reactflow";
+import ReactFlow, { Controls, Background, Panel } from "reactflow";
 import "reactflow/dist/style.css";
 import CustomNode from "./components/CustomNode";
 import { getNodesAndEdges } from "./services/NodeService";
 import DeliveryNode from "./components/DeliveryNode";
 import TransitNode from "./components/TransitNode";
-import Nodes from "./components/Nodes";
-import { groupBy } from "lodash";
-import { useEffect, useState } from "react";
+import NodePositioner from "./components/NodesFormatter";
+import { useState } from "react";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -28,10 +18,11 @@ const nodeTypes = {
 export default function Home() {
   const initialNodesAndEdges = getNodesAndEdges();
   const [nodes, setNodes] = useState(initialNodesAndEdges.nodes);
+  const [inputValue, setInputValue] = useState("");
 
-  const fitViewOptions: FitViewOptions = {
-    nodes: nodes,
-    padding: 1,
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+    console.log(event.target.value);
   };
 
   return (
@@ -40,9 +31,13 @@ export default function Home() {
         nodes={nodes}
         edges={initialNodesAndEdges.edges}
         nodeTypes={nodeTypes}>
+        <Panel position="top-center">
+          Case Label -{" "}
+          <input type="text" value={inputValue} onSubmit={handleInputChange} />
+        </Panel>
         <Background />
         <Controls />
-        <Nodes setNodes={setNodes} />
+        <NodePositioner />
       </ReactFlow>
     </div>
   );

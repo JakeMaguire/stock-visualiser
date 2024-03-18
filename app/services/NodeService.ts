@@ -1,6 +1,7 @@
-import { Edge, Node } from "reactflow";
+import { Edge, Node, Position } from "reactflow";
 import { getNodes } from "./NodeApi";
 import { groupBy } from "lodash";
+import node from "postcss/lib/node";
 
 type MoveTypes =
   | "goodsIn"
@@ -88,7 +89,7 @@ export const getNodesAndEdges = (): NodesAndEdges => {
 
         prevNodeId = deliveryNode.id;
         deliveryNodes.push(deliveryNode);
-
+        break;
       default:
         if (node.locationTo && isNewSite(sites, node)) {
           const nodeId = `site-${node.locationTo.siteId}`;
@@ -99,7 +100,6 @@ export const getNodesAndEdges = (): NodesAndEdges => {
             nodeId,
           });
         }
-
         const moveNode = constructNode(node);
         moveNodes.push(moveNode);
 
@@ -162,7 +162,7 @@ const positionNodes = (
         };
         node.parentNode = site.nodeId;
         node.zIndex = 1;
-        yPosition += 110;
+        yPosition += 150;
       });
 
       transformedNodes.push(...nodes);
@@ -232,6 +232,9 @@ const constructEdge = (prevNode: string, currentNode: string): Edge => {
     source: prevNode,
     target: currentNode,
     zIndex: 1,
+    animated: true,
+    sourceHandle: "right",
+    targetHandle: "right",
   };
 };
 

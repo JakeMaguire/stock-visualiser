@@ -21,17 +21,16 @@ const CustomNode = ({ data }: Data) => {
         <div className="ml-2 text-sm">
           <div className="text-gray-500 capitalize text-xs">Delivery</div>
           <div className="font-bold">Delivery ID: {data.deliveryId}</div>
+          <div className="font-bold">
+            Title: K2 Zinc High Temperature Galvanising Primer Spray
+          </div>
+          <div className="font-bold">SKU: 1568009143</div>
         </div>
       </div>
 
       <Handle
-        type="target"
-        position={Position.Top}
-        className="w-16 !bg-teal-500"
-      />
-      <Handle
         type="source"
-        position={Position.Bottom}
+        position={Position.Right}
         className="w-16 !bg-teal-500"
       />
     </div>

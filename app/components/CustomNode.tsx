@@ -2,13 +2,13 @@ import React, { memo } from "react";
 import { Handle, Position } from "reactflow";
 import { NodeData } from "../services/NodeService";
 
-const CustomNode = ({ data }: NodeData) => {
+const CustomNode = ({ data }: { data: NodeData }) => {
   return (
     <div>
-      <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
+      <div className="px-4 py-2 shadow-md bg-white border border-stone-500">
         <div className="flex">
           <div className="flex items-center mr-1">
-            <div className="rounded-full w-12 h-12 flex justify-center items-center bg-gray-100">
+            <div className="rounded-full w-12 h-12 flex justify-center text-xl items-center bg-gray-100">
               {data.emoji}
             </div>
           </div>
@@ -18,15 +18,21 @@ const CustomNode = ({ data }: NodeData) => {
             </div>
 
             <div>
-              <span className="font-bold">Hub: </span>
+              <span className="font-bold">Hub - </span>
               {data.hub}
             </div>
 
             <div>
-              <span className="font-bold">Location: </span>
+              <span className="font-bold">Location - </span>
               {data.location}
             </div>
           </div>
+        </div>
+
+        <div className="flex space-x-2 text-xs mt-2 text-gray-500">
+          <span>Jake Maguire</span>
+          <span>-</span>
+          <span>21 April 2023</span>
         </div>
 
         <Handle
@@ -34,6 +40,7 @@ const CustomNode = ({ data }: NodeData) => {
           position={Position.Top}
           className="w-16 !bg-teal-500"
         />
+
         <Handle
           type="source"
           position={Position.Bottom}
