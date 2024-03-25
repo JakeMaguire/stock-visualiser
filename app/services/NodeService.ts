@@ -1,7 +1,6 @@
 import { Edge, Node, Position } from "reactflow";
 import { getNodes } from "./NodeApi";
 import { groupBy } from "lodash";
-import node from "postcss/lib/node";
 
 type MoveTypes =
   | "goodsIn"
