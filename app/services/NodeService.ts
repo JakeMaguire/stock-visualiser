@@ -1,6 +1,5 @@
-import { Edge, Node, getNodesBounds } from "@xyflow/react";
-import { getNodes } from "./NodeApi";
-import { groupBy } from "lodash";
+import { Edge, Node } from "@xyflow/react";
+import { fetchStockAuditData } from "./NodeApi";
 
 type MoveTypes =
   | "goodsIn"
@@ -11,29 +10,32 @@ type MoveTypes =
   | "transit";
 
 export type GetNodesResponse = {
+  containerId: number | null;
+  containerLabel: string | null;
+  events: NodeEvent[];
+};
+
+export type NodeEvent = {
   id: number;
-  caseId: number | null;
-  caseLabel: string | null;
-  locationFrom?: {
-    id: number;
-    name: string;
-    hub: number;
-    siteId: number;
-    siteName: string;
-    type: number;
-  } | null;
-  locationTo: {
-    id: number;
-    name: string;
-    hub: number | null;
-    siteId: number;
-    siteName: string;
-    type: number;
-  } | null;
   type: MoveTypes;
   quantity: number;
   user: string;
-  time: string;
+  fromLocation?: {
+    siteId: number;
+    siteName: string;
+    locationId: number;
+    locationName: string;
+    hub: number;
+  } | null;
+  toLocation: {
+    siteId: number;
+    siteName: string;
+    locationId: number;
+    locationName: string;
+    hub: number;
+  } | null;
+  eventTime: string;
+  createdAt: string;
 };
 
 export type NodeData = {
@@ -58,6 +60,7 @@ type NodesAndEdges = {
   edges: Edge[];
 };
 
+// todo - switch to material icons
 const typeEmojiMapper = {
   goodsIn: "📋",
   move: "📦",
@@ -67,17 +70,18 @@ const typeEmojiMapper = {
   palletMove: "📦📦",
 } as const;
 
-export const getNodesAndEdges = (): NodesAndEdges => {
-  const response = getNodes();
+export const getNodesAndEdges = async (
+  containerLabel: string
+): Promise<NodesAndEdges> => {
+  const response = await fetchStockAuditData(containerLabel);
+  console.log("RESPONSE", response);
 
   const nodes: Node[] = [];
   let sites: Site[] = [];
-  let deliveryNodes: Node[] = [];
-  let moveNodes: Node[] = [];
   let edges: Edge[] = [];
   let prevNodeId: string;
 
-  response.forEach((node) => {
+  response?.events.forEach((node) => {
     switch (node.type) {
       case "delivery":
         const deliveryNode = constructDeliveryNode(node);
@@ -88,18 +92,24 @@ export const getNodesAndEdges = (): NodesAndEdges => {
         }
 
         prevNodeId = deliveryNode.id;
-        deliveryNodes.push(deliveryNode);
+        nodes.push(deliveryNode);
         break;
       default:
-        if (node.locationTo && isNewSite(sites, node)) {
-          const nodeId = `site-${node.locationTo.siteId}`;
+        if (node.toLocation && isNewSite(sites, node)) {
+          const nodeId = `site-${node.toLocation.siteId}`;
 
-          const siteNode = constructGroupNode(nodeId, node.locationTo.siteName);
+          sites.push({
+            siteId: node.toLocation.siteId,
+            siteName: node.toLocation.siteName,
+            nodeId,
+          });
+
+          const siteNode = constructGroupNode(nodeId, node.toLocation.siteName);
           nodes.push(siteNode);
         }
 
         const moveNode = constructNode(node);
-        moveNodes.push(moveNode);
+        nodes.push(moveNode);
 
         if (prevNodeId) {
           const edge = constructEdge(prevNodeId, moveNode.id);
@@ -110,37 +120,7 @@ export const getNodesAndEdges = (): NodesAndEdges => {
     }
   });
 
-  const repositionedNodes = positionNodes(sites, deliveryNodes, moveNodes);
-  return { nodes: repositionedNodes, edges };
-};
-
-const positionNodes = (
-  sites: Site[],
-  deliveryNodes: Node[],
-  moveNodes: Node[]
-): Node[] => {
-  const transformedNodes: Node[] = [];
-
-  // Get Delivery Nodes and Position Them
-  deliveryNodes.forEach((node) => {
-    transformedNodes.push(node);
-  });
-
-  // Get Sites and construct Group Nodes
-  const groupedNodes = groupBy(moveNodes, "data.siteId");
-
-  let siteXPosition = 250;
-  sites.forEach((site) => {
-    const groupNode = constructGroupNode(site.nodeId, site.siteName);
-    transformedNodes.push(groupNode);
-
-    // Get Nodes for each site and position them
-    const nodes = groupedNodes[site.siteId];
-
-    transformedNodes.push(...nodes);
-  });
-
-  return transformedNodes;
+  return { nodes, edges };
 };
 
 const constructGroupNode = (
@@ -158,7 +138,7 @@ const constructGroupNode = (
 };
 
 const constructDeliveryNode = (
-  node: GetNodesResponse,
+  node: NodeEvent,
   parentNodeId?: string
 ): Node => {
   return {
@@ -168,14 +148,14 @@ const constructDeliveryNode = (
     data: {
       deliveryId: node.id,
       emoji: typeEmojiMapper[node.type],
-      time: node.time,
+      time: node.eventTime,
     },
     parentNode: parentNodeId,
   };
 };
 
 const constructNode = (
-  node: GetNodesResponse,
+  node: NodeEvent,
   parentNodeId?: string
 ): Node<NodeData> => {
   return {
@@ -183,13 +163,13 @@ const constructNode = (
     type: "custom",
     position: { x: 0, y: 0 },
     data: {
-      siteId: node.locationTo?.siteId,
-      siteName: node.locationTo?.siteName,
-      hub: node.locationTo?.hub,
-      location: node.locationTo?.name,
+      siteId: node.toLocation?.siteId,
+      siteName: node.toLocation?.siteName,
+      hub: node.toLocation?.hub,
+      location: node.toLocation?.locationName,
       moveType: node.type,
       emoji: typeEmojiMapper[node.type],
-      time: node.time,
+      time: node.eventTime,
       wasBrokenDown: node.type === "bookIn", //todo - need to fix this
     },
     parentNode: parentNodeId,
@@ -207,6 +187,6 @@ const constructEdge = (prevNode: string, currentNode: string): Edge => {
   };
 };
 
-const isNewSite = (sites: Site[], node: GetNodesResponse) => {
-  return !sites.find((site) => site.siteId === node.locationTo?.siteId);
+const isNewSite = (sites: Site[], node: NodeEvent) => {
+  return !sites.find((site) => site.siteId === node.toLocation?.siteId);
 };
