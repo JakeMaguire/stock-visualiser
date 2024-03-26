@@ -1,4 +1,4 @@
-import { Edge, Node, Position } from "reactflow";
+import { Edge, Node, getNodesBounds } from "@xyflow/react";
 import { getNodes } from "./NodeApi";
 import { groupBy } from "lodash";
 
@@ -70,6 +70,7 @@ const typeEmojiMapper = {
 export const getNodesAndEdges = (): NodesAndEdges => {
   const response = getNodes();
 
+  const nodes: Node[] = [];
   let sites: Site[] = [];
   let deliveryNodes: Node[] = [];
   let moveNodes: Node[] = [];
@@ -93,12 +94,10 @@ export const getNodesAndEdges = (): NodesAndEdges => {
         if (node.locationTo && isNewSite(sites, node)) {
           const nodeId = `site-${node.locationTo.siteId}`;
 
-          sites.push({
-            siteId: node.locationTo.siteId,
-            siteName: node.locationTo.siteName,
-            nodeId,
-          });
+          const siteNode = constructGroupNode(nodeId, node.locationTo.siteName);
+          nodes.push(siteNode);
         }
+
         const moveNode = constructNode(node);
         moveNodes.push(moveNode);
 
@@ -112,7 +111,6 @@ export const getNodesAndEdges = (): NodesAndEdges => {
   });
 
   const repositionedNodes = positionNodes(sites, deliveryNodes, moveNodes);
-
   return { nodes: repositionedNodes, edges };
 };
 
@@ -124,17 +122,7 @@ const positionNodes = (
   const transformedNodes: Node[] = [];
 
   // Get Delivery Nodes and Position Them
-  let deliveryYPosition = 0;
   deliveryNodes.forEach((node) => {
-    if (node.type === "delivery") {
-      node.position = {
-        x: 0,
-        y: deliveryYPosition,
-      };
-
-      deliveryYPosition += 100;
-    }
-
     transformedNodes.push(node);
   });
 
@@ -143,29 +131,13 @@ const positionNodes = (
 
   let siteXPosition = 250;
   sites.forEach((site) => {
-    const groupNode = constructGroupNode(
-      site.nodeId,
-      site.siteName,
-      siteXPosition
-    );
+    const groupNode = constructGroupNode(site.nodeId, site.siteName);
     transformedNodes.push(groupNode);
 
     // Get Nodes for each site and position them
     const nodes = groupedNodes[site.siteId];
-    if (nodes) {
-      let yPosition = 40;
-      nodes.forEach((node) => {
-        node.position = {
-          x: 20,
-          y: yPosition,
-        };
-        node.parentNode = site.nodeId;
-        node.zIndex = 1;
-        yPosition += 150;
-      });
 
-      transformedNodes.push(...nodes);
-    }
+    transformedNodes.push(...nodes);
   });
 
   return transformedNodes;
@@ -174,15 +146,14 @@ const positionNodes = (
 const constructGroupNode = (
   id: string,
   label: string,
-  groupXPosition: number
+  groupXPosition?: number
 ): Node => {
   return {
     id,
     data: { label },
-    position: { x: groupXPosition, y: 0 },
+    position: { x: groupXPosition ?? 0, y: 0 },
     className: "light",
     style: { width: 300, height: 500 },
-    // type: "group",
   };
 };
 
@@ -222,6 +193,7 @@ const constructNode = (
       wasBrokenDown: node.type === "bookIn", //todo - need to fix this
     },
     parentNode: parentNodeId,
+    zIndex: 1,
   };
 };
 
@@ -232,8 +204,6 @@ const constructEdge = (prevNode: string, currentNode: string): Edge => {
     target: currentNode,
     zIndex: 1,
     animated: true,
-    sourceHandle: "right",
-    targetHandle: "right",
   };
 };
 

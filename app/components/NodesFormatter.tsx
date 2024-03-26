@@ -1,6 +1,11 @@
 import { groupBy } from "lodash";
 import { useEffect } from "react";
-import { getNodesBounds, useNodes, useReactFlow } from "reactflow";
+import { getNodesBounds, useNodes, useReactFlow } from "@xyflow/react";
+
+// Padding applied to the parent node to fit in children
+const X_PADDING = 40;
+const Y_PADDING = 65;
+let currentXValue = 0;
 
 export default function NodePositioner() {
   const reactFlow = useReactFlow();
@@ -14,43 +19,53 @@ export default function NodePositioner() {
     // If no nodes are present, return
     if (!nodes.length) return;
 
-    // Padding applied to the parent node to fit in children
-    const xPadding = 40;
-    const yPadding = 65;
-
     const deliveryNode = nodes.filter((node) => node.type === "delivery");
 
-    let currentXValue =
-      deliveryNode.length > 0 ? (deliveryNode[0]?.width || 0) + xPadding : 0;
+    if (deliveryNode[0] && deliveryNode[0].computed) {
+      currentXValue = (deliveryNode[0]?.computed.width || 0) + X_PADDING;
+    }
 
     Object.keys(groupedNodes).forEach((key) => {
       if (key !== "undefined") {
-        // Gets the bounds of all children nodes
+        // Gets the bounds of all children nodes to rezise site node to fit children
         const bounds = getNodesBounds(groupedNodes[key]);
         const parentNodeIndex = nodes.findIndex(
           (node) => node.id === `site-${key}`
         );
+        const siteNode = nodes[parentNodeIndex];
 
-        // Now we know the outer bounds of the children nodes, we can set the size of the parent node to fit
-        nodes[parentNodeIndex].style = {
-          width: bounds.width + xPadding,
-          height: bounds.height + yPadding,
-        };
-
-        const position = { ...nodes[parentNodeIndex].position };
+        const position = { ...siteNode.position };
 
         // If we have moved past the first site add the size of the previous site to the x value
         if (currentXValue > 0) {
           position.x = currentXValue;
-          nodes[parentNodeIndex].positionAbsolute = {
-            ...position,
-          };
-          nodes[parentNodeIndex].position = {
+
+          if (siteNode.computed) {
+            siteNode.computed.positionAbsolute = {
+              ...position,
+            };
+
+            siteNode.height = bounds.height + Y_PADDING;
+            siteNode.width = bounds.width + X_PADDING;
+          }
+          siteNode.position = {
             ...position,
           };
         }
 
-        currentXValue = position.x + bounds.width + xPadding + 60;
+        currentXValue = position.x + bounds.width + X_PADDING + 60;
+
+        // Position children inside the site parent node
+        let yPosition = 40;
+        groupedNodes[key].forEach((node) => {
+          node.position = {
+            x: 20,
+            y: yPosition,
+          };
+          node.parentNode = siteNode.id;
+          node.zIndex = 1;
+          yPosition += 150;
+        });
       }
     });
 

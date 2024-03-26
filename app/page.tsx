@@ -1,7 +1,7 @@
 "use client";
 
-import ReactFlow, { Controls, Background, Panel } from "reactflow";
-import "reactflow/dist/style.css";
+import { ReactFlow, Controls, Background, Panel } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import CustomNode from "./components/CustomNode";
 import { getNodesAndEdges } from "./services/NodeService";
 import DeliveryNode from "./components/DeliveryNode";
@@ -24,6 +24,9 @@ export default function Home() {
     setInputValue(event.target.value);
     console.log(event.target.value);
   };
+
+  console.log(nodes);
+  console.log(initialNodesAndEdges.edges);
 
   return (
     <div className="h-screen w-screen">

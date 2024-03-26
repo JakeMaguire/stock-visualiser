@@ -1,6 +1,5 @@
 import React, { memo } from "react";
-import { Handle, Position } from "reactflow";
-import CustomNode from "./CustomNode";
+import { Handle, Position } from "@xyflow/react";
 
 export type Data = {
   data: {
