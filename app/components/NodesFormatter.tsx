@@ -64,7 +64,7 @@ export default function NodePositioner() {
           };
           node.parentNode = siteNode.id;
           node.zIndex = 1;
-          yPosition += 150;
+          yPosition += 300;
         });
       }
     });

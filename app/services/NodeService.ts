@@ -1,7 +1,16 @@
 import { Edge, Node } from "@xyflow/react";
 import { fetchStockAuditData } from "./NodeApi";
+import {
+  faTruckRampBox,
+  faArrowRight,
+  faDolly,
+  faTruck,
+  faBoxOpen,
+  IconDefinition,
+  faBoxesStacked,
+} from "@fortawesome/free-solid-svg-icons";
 
-type MoveTypes =
+type MoveType =
   | "goodsIn"
   | "move"
   | "delivery"
@@ -17,7 +26,7 @@ export type GetNodesResponse = {
 
 export type NodeEvent = {
   id: number;
-  type: MoveTypes;
+  type: MoveType;
   quantity: number;
   user: string;
   fromLocation?: {
@@ -43,8 +52,8 @@ export type NodeData = {
   siteName?: string;
   hub?: number | null;
   location?: string;
-  moveType: string;
-  emoji?: string;
+  moveType: MoveType;
+  icon: IconDefinition;
   time: string;
   wasBrokenDown: boolean;
 };
@@ -60,14 +69,17 @@ type NodesAndEdges = {
   edges: Edge[];
 };
 
-// todo - switch to material icons
-const typeEmojiMapper = {
-  goodsIn: "📋",
-  move: "📦",
-  delivery: "🚛",
-  transit: "🚛",
-  bookIn: "📖",
-  palletMove: "📦📦",
+type Icon = {
+  icon: IconDefinition;
+};
+
+const iconMap: Record<string, IconDefinition> = {
+  delivery: faTruckRampBox,
+  goodsIn: faDolly,
+  move: faArrowRight,
+  transit: faTruck,
+  bookIn: faBoxOpen,
+  palletMove: faBoxesStacked,
 } as const;
 
 export const getNodesAndEdges = async (
@@ -133,7 +145,14 @@ const constructGroupNode = (
     data: { label },
     position: { x: groupXPosition ?? 0, y: 0 },
     className: "light",
-    style: { width: 300, height: 500 },
+    // todo - move style out of here and into a custom group node component
+    style: {
+      background: "none",
+      textAlign: "left",
+      paddingLeft: 20,
+      fontSize: 14,
+      // border: "1px solid #b07ff5",
+    },
   };
 };
 
@@ -147,7 +166,7 @@ const constructDeliveryNode = (
     position: { x: 0, y: 0 },
     data: {
       deliveryId: node.id,
-      emoji: typeEmojiMapper[node.type],
+      icon: iconMap[node.type],
       time: node.eventTime,
     },
     parentNode: parentNodeId,
@@ -168,7 +187,7 @@ const constructNode = (
       hub: node.toLocation?.hub,
       location: node.toLocation?.locationName,
       moveType: node.type,
-      emoji: typeEmojiMapper[node.type],
+      icon: iconMap[node.type],
       time: node.eventTime,
       wasBrokenDown: node.type === "bookIn", //todo - need to fix this
     },

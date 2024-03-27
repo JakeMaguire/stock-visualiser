@@ -9,11 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-regular-svg-icons": "^6.5.1",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@radix-ui/react-separator": "^1.0.3",
     "@xyflow/react": "12.0.0-next.12",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.363.0",
     "next": "14.1.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "tailwind-merge": "^2.2.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",

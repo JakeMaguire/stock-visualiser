@@ -44,7 +44,11 @@ export default function Home() {
 
   return (
     <div className="h-screen w-screen">
-      <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        colorMode="dark">
         <Panel position="top-center">
           Case Label -{" "}
           <input type="text" value={inputValue} onChange={handleInputChange} />
