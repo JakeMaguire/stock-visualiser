@@ -8,11 +8,11 @@ import {
   Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import CustomNode from "./components/CustomNode";
-import { getNodesAndEdges } from "./services/NodeService";
-import DeliveryNode from "./components/DeliveryNode";
-import TransitNode from "./components/TransitNode";
-import NodePositioner from "./components/NodesFormatter";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import CustomNode from "../components/customNode";
+import { getNodesAndEdges } from "./services/stockAuditService";
+import DeliveryNode from "../components/deliveryNode";
+import NodePositioner from "../components/nodesFormatter";
 import { Suspense, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,7 +28,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const nodeTypes = {
   custom: CustomNode,
   delivery: DeliveryNode,
-  transit: TransitNode,
 };
 
 export default function Home() {
@@ -49,8 +48,6 @@ export default function Home() {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   };
-
-  console.log("EDGES", edges);
 
   return (
     <div className="h-screen w-screen flex">

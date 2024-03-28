@@ -1,15 +1,8 @@
 import { Edge, Node } from "@xyflow/react";
-import { fetchStockAuditData } from "./NodeApi";
-import {
-  faTruckRampBox,
-  faArrowRight,
-  faDolly,
-  faTruck,
-  faBoxOpen,
-  IconDefinition,
-  faBoxesStacked,
-  faPeopleCarryBox,
-} from "@fortawesome/free-solid-svg-icons";
+import { fetchStockAuditData } from "./stockAuditGateway";
+import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import iconMap from "../utils/IconMapper";
+import dayjs from "dayjs";
 
 type MoveType =
   | "goodsIn"
@@ -24,13 +17,6 @@ export type GetNodesResponse = {
   containerId: number | null;
   containerLabel: string | null;
   events: AuditEvent[];
-};
-
-export type DeliveryNodeData = {
-  deliveryId: number;
-  moveType: MoveType;
-  icon: IconDefinition;
-  time: string;
 };
 
 export type AuditEvent = {
@@ -56,16 +42,28 @@ export type AuditEvent = {
   createdAt: string;
 };
 
-export type NodeData = {
+export type BaseNodeData = {
+  moveType: MoveType;
+  icon: IconDefinition;
+  time: string;
+  wasBrokenDown?: boolean;
+  user: string;
+};
+
+type DeliveryNodeData = {
+  deliveryId: number;
+};
+
+export type DeliveryNode = BaseNodeData & DeliveryNodeData;
+
+type CustomNodeData = {
   siteId?: number;
   siteName?: string;
   hub?: number | null;
   location?: string;
-  moveType: MoveType;
-  icon: IconDefinition;
-  time: string;
-  wasBrokenDown: boolean;
 };
+
+export type CustomNode = BaseNodeData & CustomNodeData;
 
 type Site = {
   siteId: number;
@@ -77,16 +75,6 @@ type NodesAndEdges = {
   nodes: Node[];
   edges: Edge[];
 };
-
-const iconMap: Record<string, IconDefinition> = {
-  delivery: faTruckRampBox,
-  goodsIn: faDolly,
-  move: faArrowRight,
-  transit: faTruck,
-  bookIn: faBoxOpen,
-  palletMove: faBoxesStacked,
-  crossStock: faPeopleCarryBox,
-} as const;
 
 export const getNodesAndEdges = async (
   containerLabel: string
@@ -164,10 +152,7 @@ const constructGroupNode = (
 const constructDeliveryNode = (
   node: AuditEvent,
   parentNodeId?: string
-): Node<DeliveryNodeData> => {
-  console.log(iconMap);
-  console.log(node.type);
-  console.log(iconMap[node.type]);
+): Node<DeliveryNode> => {
   return {
     id: node.id.toString(),
     type: node.type,
@@ -176,7 +161,8 @@ const constructDeliveryNode = (
       deliveryId: node.id,
       moveType: node.type,
       icon: iconMap[node.type],
-      time: node.eventTime,
+      time: dayjs(node.eventTime).format("DD MMM YYYY : HH:mm"),
+      user: node.user,
     },
     parentNode: parentNodeId,
   };
@@ -185,7 +171,7 @@ const constructDeliveryNode = (
 const constructNode = (
   node: AuditEvent,
   parentNodeId?: string
-): Node<NodeData> => {
+): Node<CustomNode> => {
   return {
     id: node.id.toString(),
     type: "custom",
@@ -197,7 +183,8 @@ const constructNode = (
       location: node.toLocation?.locationName,
       moveType: node.type,
       icon: iconMap[node.type],
-      time: node.eventTime,
+      time: dayjs(node.eventTime).format("DD MMM YYYY : HH:mm"),
+      user: node.user,
       wasBrokenDown: node.type === "bookIn", //todo - need to fix this
     },
     parentNode: parentNodeId,

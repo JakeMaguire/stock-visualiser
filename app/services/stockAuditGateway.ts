@@ -1,4 +1,4 @@
-import { GetNodesResponse } from "./NodeService";
+import { GetNodesResponse } from "./stockAuditService";
 
 export const fetchStockAuditData = async (containerLabel: string) => {
   try {

@@ -1,4 +1,4 @@
-export const ColorMap = {
+const ColorMap = {
   goodsIn: "bg-blue-500",
   move: "bg-green-500",
   delivery: "bg-yellow-500",
@@ -7,3 +7,5 @@ export const ColorMap = {
   transit: "bg-gray-500",
   crossStock: "bg-orange-500",
 } as const;
+
+export default ColorMap;
