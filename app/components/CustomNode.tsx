@@ -9,15 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-const colorMap = {
-  goodsIn: "bg-blue-500",
-  move: "bg-green-500",
-  delivery: "bg-yellow-500",
-  bookIn: "bg-purple-500",
-  palletMove: "bg-red-500",
-  transit: "bg-gray-500",
-} as const;
+import { faUser, faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import { ColorMap } from "../utils/ColorMappers";
 
 const CustomNode = ({ data }: { data: NodeData }) => {
   return (
@@ -28,33 +21,41 @@ const CustomNode = ({ data }: { data: NodeData }) => {
             <div className="capitalize text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <div
-                  className={`${colorMap[data.moveType]} rounded-sm h-9 w-9 flex justify-center items-center`}>
+                  className={`${ColorMap[data.moveType]} rounded-sm h-8 w-8 flex justify-center items-center`}>
                   <FontAwesomeIcon className="text-white" icon={data.icon} />
                 </div>
                 <div>{data.moveType}</div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 text-xl font-semibold leading-none tracking-tight">
-            <div>Hub - {data.hub}</div>
-            <div>Location - {data.location}</div>
+          <CardContent className="space-y-3 text-xl font-semibold leading-none tracking-tight py-0">
+            <div>
+              <div>Hub - {data.hub}</div>
+              <div>Location - {data.location}</div>
+            </div>
+            <Separator />
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <div className="flex space-x-2 items-center">
+                <FontAwesomeIcon icon={faUser} /> <span>Jake Maguire</span>
+              </div>
+              <div className="flex space-x-2 items-center">
+                <FontAwesomeIcon icon={faCalendarDays} />{" "}
+                <span>21 July 2023 : 12:02</span>
+              </div>
+            </div>
           </CardContent>
-          <Separator />
-          <CardFooter className="flex justify-between text-sm text-muted-foreground pt-6">
-            <div>Jake Maguire</div>
-            <div>21 July 2023 : 12:02</div>
-          </CardFooter>
+          <CardFooter />
         </Card>
 
         <Handle
           type="target"
           position={Position.Top}
-          className="w-16 !bg-teal-500"
+          className="w-16 bg-white"
         />
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-16 !bg-teal-500"
+          className="h-32 w-32 bg-white"
         />
       </div>
 

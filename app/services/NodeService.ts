@@ -8,6 +8,7 @@ import {
   faBoxOpen,
   IconDefinition,
   faBoxesStacked,
+  faPeopleCarryBox,
 } from "@fortawesome/free-solid-svg-icons";
 
 type MoveType =
@@ -16,15 +17,23 @@ type MoveType =
   | "delivery"
   | "bookIn"
   | "palletMove"
+  | "crossStock"
   | "transit";
 
 export type GetNodesResponse = {
   containerId: number | null;
   containerLabel: string | null;
-  events: NodeEvent[];
+  events: AuditEvent[];
 };
 
-export type NodeEvent = {
+export type DeliveryNodeData = {
+  deliveryId: number;
+  moveType: MoveType;
+  icon: IconDefinition;
+  time: string;
+};
+
+export type AuditEvent = {
   id: number;
   type: MoveType;
   quantity: number;
@@ -69,10 +78,6 @@ type NodesAndEdges = {
   edges: Edge[];
 };
 
-type Icon = {
-  icon: IconDefinition;
-};
-
 const iconMap: Record<string, IconDefinition> = {
   delivery: faTruckRampBox,
   goodsIn: faDolly,
@@ -80,13 +85,13 @@ const iconMap: Record<string, IconDefinition> = {
   transit: faTruck,
   bookIn: faBoxOpen,
   palletMove: faBoxesStacked,
+  crossStock: faPeopleCarryBox,
 } as const;
 
 export const getNodesAndEdges = async (
   containerLabel: string
 ): Promise<NodesAndEdges> => {
   const response = await fetchStockAuditData(containerLabel);
-  console.log("RESPONSE", response);
 
   const nodes: Node[] = [];
   let sites: Site[] = [];
@@ -144,28 +149,32 @@ const constructGroupNode = (
     id,
     data: { label },
     position: { x: groupXPosition ?? 0, y: 0 },
-    className: "light",
     // todo - move style out of here and into a custom group node component
     style: {
       background: "none",
       textAlign: "left",
       paddingLeft: 20,
-      fontSize: 14,
-      // border: "1px solid #b07ff5",
+      paddingTop: 30,
+      fontSize: 24,
+      fontWeight: "bold",
     },
   };
 };
 
 const constructDeliveryNode = (
-  node: NodeEvent,
+  node: AuditEvent,
   parentNodeId?: string
-): Node => {
+): Node<DeliveryNodeData> => {
+  console.log(iconMap);
+  console.log(node.type);
+  console.log(iconMap[node.type]);
   return {
     id: node.id.toString(),
-    type: "delivery",
+    type: node.type,
     position: { x: 0, y: 0 },
     data: {
       deliveryId: node.id,
+      moveType: node.type,
       icon: iconMap[node.type],
       time: node.eventTime,
     },
@@ -174,7 +183,7 @@ const constructDeliveryNode = (
 };
 
 const constructNode = (
-  node: NodeEvent,
+  node: AuditEvent,
   parentNodeId?: string
 ): Node<NodeData> => {
   return {
@@ -203,9 +212,13 @@ const constructEdge = (prevNode: string, currentNode: string): Edge => {
     target: currentNode,
     zIndex: 1,
     animated: true,
+    style: {
+      stroke: "#f57fd4",
+      strokeWidth: 2,
+    },
   };
 };
 
-const isNewSite = (sites: Site[], node: NodeEvent) => {
+const isNewSite = (sites: Site[], node: AuditEvent) => {
   return !sites.find((site) => site.siteId === node.toLocation?.siteId);
 };

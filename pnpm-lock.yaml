@@ -11,12 +11,21 @@ dependencies:
   '@fortawesome/free-regular-svg-icons':
     specifier: ^6.5.1
     version: 6.5.1
+  '@fortawesome/free-solid-svg-icons':
+    specifier: ^6.5.1
+    version: 6.5.1
   '@fortawesome/react-fontawesome':
     specifier: ^0.2.0
     version: 0.2.0(@fortawesome/fontawesome-svg-core@6.5.1)(react@18.2.0)
+  '@radix-ui/react-label':
+    specifier: ^2.0.2
+    version: 2.0.2(@types/react-dom@18.2.22)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0)
   '@radix-ui/react-separator':
     specifier: ^1.0.3
     version: 1.0.3(@types/react-dom@18.2.22)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0)
+  '@radix-ui/react-slot':
+    specifier: ^1.0.2
+    version: 1.0.2(@types/react@18.2.73)(react@18.2.0)
   '@xyflow/react':
     specifier: 12.0.0-next.12
     version: 12.0.0-next.12(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0)
@@ -153,6 +162,14 @@ packages:
 
   /@fortawesome/free-regular-svg-icons@6.5.1:
     resolution: {integrity: sha512-m6ShXn+wvqEU69wSP84coxLbNl7sGVZb+Ca+XZq6k30SzuP3X4TfPqtycgUh9ASwlNh5OfQCd8pDIWxl+O+LlQ==}
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dependencies:
+      '@fortawesome/fontawesome-common-types': 6.5.1
+    dev: false
+
+  /@fortawesome/free-solid-svg-icons@6.5.1:
+    resolution: {integrity: sha512-S1PPfU3mIJa59biTtXJz1oI0+KAXW6bkAb31XKhxdxtuXDiUIFsih4JR1v5BbxY7hVHsD1RKq+jRkVRaf773NQ==}
     engines: {node: '>=6'}
     requiresBuild: true
     dependencies:
@@ -353,6 +370,27 @@ packages:
       '@babel/runtime': 7.24.1
       '@types/react': 18.2.73
       react: 18.2.0
+    dev: false
+
+  /@radix-ui/react-label@2.0.2(@types/react-dom@18.2.22)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-N5ehvlM7qoTLx7nWPodsPYPgMzA5WM8zZChQg8nyFJKnDO5WHdba1vv5/H6IO5LtJMfD2Q3wh1qHFGNtK0w3bQ==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.24.1
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.22)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0)
+      '@types/react': 18.2.73
+      '@types/react-dom': 18.2.22
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@radix-ui/react-primitive@1.0.3(@types/react-dom@18.2.22)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0):

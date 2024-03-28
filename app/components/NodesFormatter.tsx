@@ -4,7 +4,7 @@ import { getNodesBounds, useNodes, useReactFlow } from "@xyflow/react";
 
 // Padding applied to the parent node to fit in children
 const X_PADDING = 40;
-const Y_PADDING = 65;
+const Y_PADDING = 135;
 let currentXValue = 0;
 
 export default function NodePositioner() {
@@ -23,6 +23,10 @@ export default function NodePositioner() {
 
     if (deliveryNode[0] && deliveryNode[0].computed) {
       currentXValue = (deliveryNode[0]?.computed.width || 0) + X_PADDING;
+      deliveryNode[0].computed.positionAbsolute = {
+        x: 0,
+        y: 100,
+      };
     }
 
     Object.keys(groupedNodes).forEach((key) => {
@@ -56,7 +60,7 @@ export default function NodePositioner() {
         currentXValue = position.x + bounds.width + X_PADDING + 60;
 
         // Position children inside the site parent node
-        let yPosition = 40;
+        let yPosition = 100;
         groupedNodes[key].forEach((node) => {
           node.position = {
             x: 20,
@@ -71,7 +75,7 @@ export default function NodePositioner() {
 
     // Resizes the default view to fit the repositioned nodes
     reactFlow.fitView({
-      padding: 0.3,
+      padding: 0.6,
     });
   }, [groupedNodes, nodes, reactFlow]);
 
