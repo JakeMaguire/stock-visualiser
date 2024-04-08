@@ -6,6 +6,7 @@ import {
   Background,
   Node as FlowNode,
   Edge,
+  EdgeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -16,10 +17,20 @@ import NodePositioner from "../components/nodesFormatter";
 import { Suspense, useEffect, useState } from "react";
 import SideBar from "../components/sidebar";
 import useSearchStore from "./stores/store";
+import CustomEdge from "../components/customEdge";
+import brokenDownNode from "../components/brokenDownNode";
+import { toast } from "sonner";
 
 const nodeTypes = {
   custom: CustomNode,
   delivery: DeliveryNode,
+  brokenDown: brokenDownNode,
+  adjustment: CustomNode,
+};
+
+const edgeTypes: EdgeTypes = {
+  bookIn: CustomEdge,
+  adjustment: CustomEdge,
 };
 
 export default function Home() {
@@ -30,13 +41,26 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchData() {
-      const initialNodesAndEdges = await getNodesAndEdges(caseLabel);
-      setNodes(initialNodesAndEdges.nodes);
-      setEdges(initialNodesAndEdges.edges);
+      try {
+        const initialNodesAndEdges = await getNodesAndEdges(caseLabel);
+
+        setNodes(initialNodesAndEdges.nodes);
+        setEdges(initialNodesAndEdges.edges);
+      } catch (error) {
+        toast("Something went wrong", {
+          description: "Unable to find the case label. Please try again.",
+          action: {
+            label: "Clear",
+            onClick: () => console.log("Undo"),
+          },
+        });
+      }
     }
 
     fetchData();
   }, [caseLabel]);
+
+  console.log("EDGES", edges);
 
   return (
     <div className="h-screen w-screen flex">
@@ -49,6 +73,7 @@ export default function Home() {
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           colorMode="dark">
           <Background />
           <Controls position="bottom-right" />

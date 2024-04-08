@@ -19,21 +19,23 @@ const BaseNode = ({
 }: {
   data: BaseNodeData;
   content: ReactElement;
-  handles: ReactElement;
+  handles?: ReactElement;
 }) => {
   return (
     <div>
       <div className="shadow-md rounded-2xl bg-[#1e1e1e] border border-[#b07ff5] text-[#e5e4e7]">
         <Card className="w-[350px]">
           <CardHeader>
-            <div className="capitalize text-sm text-muted-foreground">
+            <div className="flex items-center justify-between capitalize text-sm text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <div
                   className={`${ColorMap[data.moveType]} rounded-sm h-8 w-8 flex justify-center items-center`}>
                   <FontAwesomeIcon className="text-white" icon={data.icon} />
                 </div>
+
                 <div>{data.moveType}</div>
               </div>
+              <div>Quantity - {data.caseQuantity}</div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 text-xl font-semibold leading-none tracking-tight py-0">
@@ -56,21 +58,8 @@ const BaseNode = ({
 
         {handles}
       </div>
-
-      <BrokenDown brokenDown={data.wasBrokenDown} />
     </div>
   );
-};
-
-// todo - fix optional broken down
-const BrokenDown = ({ brokenDown }: { brokenDown?: boolean }) => {
-  if (brokenDown) {
-    return (
-      <div className="text-xs text-center mt-2 p-1 bg-[#b07ff5] text-black">
-        Case was broken down
-      </div>
-    );
-  }
 };
 
 export default memo(BaseNode);

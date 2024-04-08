@@ -61,14 +61,34 @@ export default function NodePositioner() {
 
         // Position children inside the site parent node
         let yPosition = 100;
+        let bookInXPosition = 20;
+        let bookInYPadding = 0;
+
         groupedNodes[key].forEach((node) => {
-          node.position = {
-            x: 20,
-            y: yPosition,
-          };
-          node.parentNode = siteNode.id;
-          node.zIndex = 1;
-          yPosition += 300;
+          if (node.data.moveType === "bookIn") {
+            node.position = {
+              x: bookInXPosition,
+              y: yPosition,
+            };
+            node.parentNode = siteNode.id;
+            node.zIndex = 1;
+            bookInXPosition += 500;
+
+            bookInYPadding += 100;
+          } else {
+            if (bookInYPadding > 0) {
+              yPosition += bookInYPadding;
+              bookInYPadding = 0;
+            }
+
+            node.position = {
+              x: 20,
+              y: yPosition,
+            };
+            node.parentNode = siteNode.id;
+            node.zIndex = 1;
+            yPosition += 300;
+          }
         });
       }
     });

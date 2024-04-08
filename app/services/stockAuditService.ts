@@ -4,14 +4,16 @@ import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import iconMap from "../utils/IconMapper";
 import dayjs from "dayjs";
 
-type MoveType =
+export type MoveType =
   | "goodsIn"
   | "move"
   | "delivery"
   | "bookIn"
   | "palletMove"
   | "crossStock"
-  | "transit";
+  | "transit"
+  | "brokenDown"
+  | "adjustment";
 
 export type GetNodesResponse = {
   containerId: number | null;
@@ -22,15 +24,11 @@ export type GetNodesResponse = {
 export type AuditEvent = {
   id: number;
   type: MoveType;
-  quantity: number;
+  caseQuantity: number;
   user: string;
-  fromLocation?: {
-    siteId: number;
-    siteName: string;
-    locationId: number;
-    locationName: string;
-    hub: number;
-  } | null;
+  deliveryId: number | null;
+  adjustedQuantity: number | null;
+  sku: string | null;
   toLocation: {
     siteId: number;
     siteName: string;
@@ -46,12 +44,13 @@ export type BaseNodeData = {
   moveType: MoveType;
   icon: IconDefinition;
   time: string;
-  wasBrokenDown?: boolean;
   user: string;
+  caseQuantity: number | null;
 };
 
 type DeliveryNodeData = {
-  deliveryId: number;
+  deliveryId: number | null;
+  sku: string | null;
 };
 
 export type DeliveryNode = BaseNodeData & DeliveryNodeData;
@@ -61,6 +60,7 @@ type CustomNodeData = {
   siteName?: string;
   hub?: number | null;
   location?: string;
+  adjustedQuantity?: number | null;
 };
 
 export type CustomNode = BaseNodeData & CustomNodeData;
@@ -99,6 +99,16 @@ export const getNodesAndEdges = async (
         prevNodeId = deliveryNode.id;
         nodes.push(deliveryNode);
         break;
+      case "brokenDown":
+        const brokenDownNode = constructBrokenDownNode(node);
+        nodes.push(brokenDownNode);
+
+        if (prevNodeId) {
+          const edge = constructEdge(prevNodeId, brokenDownNode.id, node.type);
+          edges.push(edge);
+        }
+
+        break;
       default:
         if (node.toLocation && isNewSite(sites, node)) {
           const nodeId = `site-${node.toLocation.siteId}`;
@@ -117,11 +127,16 @@ export const getNodesAndEdges = async (
         nodes.push(moveNode);
 
         if (prevNodeId) {
-          const edge = constructEdge(prevNodeId, moveNode.id);
+          const edge = constructEdge(
+            prevNodeId,
+            moveNode.id,
+            node.type,
+            node.adjustedQuantity
+          );
           edges.push(edge);
         }
 
-        prevNodeId = moveNode.id;
+        if (node.type !== "bookIn") prevNodeId = moveNode.id;
     }
   });
 
@@ -145,6 +160,8 @@ const constructGroupNode = (
       paddingTop: 30,
       fontSize: 24,
       fontWeight: "bold",
+      borderRadius: 10,
+      borderColor: "#78716c",
     },
   };
 };
@@ -158,7 +175,33 @@ const constructDeliveryNode = (
     type: node.type,
     position: { x: 0, y: 0 },
     data: {
-      deliveryId: node.id,
+      deliveryId: node.deliveryId,
+      caseQuantity: node.caseQuantity,
+      sku: node.sku,
+      moveType: node.type,
+      icon: iconMap[node.type],
+      time: dayjs(node.eventTime).format("DD MMM YYYY : HH:mm"),
+      user: node.user,
+    },
+    parentNode: parentNodeId,
+  };
+};
+
+const constructBrokenDownNode = (
+  node: AuditEvent,
+  parentNodeId?: string
+): Node<CustomNode> => {
+  console.log("CREATING BROKEN DOWN NODE");
+  return {
+    id: node.id.toString(),
+    type: node.type,
+    position: { x: 0, y: 0 },
+    data: {
+      siteId: node.toLocation?.siteId,
+      siteName: node.toLocation?.siteName,
+      hub: node.toLocation?.hub,
+      location: node.toLocation?.locationName,
+      caseQuantity: node.caseQuantity,
       moveType: node.type,
       icon: iconMap[node.type],
       time: dayjs(node.eventTime).format("DD MMM YYYY : HH:mm"),
@@ -181,27 +224,37 @@ const constructNode = (
       siteName: node.toLocation?.siteName,
       hub: node.toLocation?.hub,
       location: node.toLocation?.locationName,
+      caseQuantity: node.caseQuantity,
+      adjustedQuantity: node.adjustedQuantity,
       moveType: node.type,
       icon: iconMap[node.type],
       time: dayjs(node.eventTime).format("DD MMM YYYY : HH:mm"),
       user: node.user,
-      wasBrokenDown: node.type === "bookIn", //todo - need to fix this
     },
     parentNode: parentNodeId,
     zIndex: 1,
   };
 };
 
-const constructEdge = (prevNode: string, currentNode: string): Edge => {
+const constructEdge = (
+  prevNode: string,
+  currentNode: string,
+  type?: MoveType,
+  adjustedQuantity?: number | null
+): Edge => {
   return {
     id: `${prevNode}-${currentNode}`,
+    type,
     source: prevNode,
     target: currentNode,
     zIndex: 1,
     animated: true,
+    data: {
+      adjustedQuantity,
+    },
     style: {
       stroke: "#f57fd4",
-      strokeWidth: 2,
+      strokeWidth: 3,
     },
   };
 };

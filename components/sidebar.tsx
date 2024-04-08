@@ -9,6 +9,7 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import useSearchStore from "../app/stores/store";
+import { Button } from "./ui/button";
 
 const SideBar = () => {
   const updateCaseLabel = useSearchStore((state) => state.updateCaseLabel);
@@ -30,13 +31,20 @@ const SideBar = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center">
-            <FontAwesomeIcon className="absolute pl-2" icon={faSearch} />
-            <Input
-              type="text"
-              placeholder="Enter case label..."
-              onChange={(e) => updateCaseLabel(e.target.value)}
-              className="h-8 text-xs pl-7"
-            />
+            <div className="flex w-full items-center space-x-2">
+              <div className="flex items-center w-full">
+                <FontAwesomeIcon className="absolute pl-2" icon={faSearch} />
+                <Input
+                  type="text"
+                  placeholder="Enter case label..."
+                  onChange={(e) => updateCaseLabel(e.target.value)}
+                  className="h-8 text-xs pl-7"
+                />
+              </div>
+              <Button className="text-xs" type="submit">
+                Find
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
