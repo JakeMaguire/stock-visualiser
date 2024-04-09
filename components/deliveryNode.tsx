@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { DeliveryNode } from "../app/services/stockAuditService";
+import type { DeliveryNode } from "../app/services/stockAuditService";
 import BaseNode from "./baseNode";
 import { Handle, Position } from "@xyflow/react";
 
