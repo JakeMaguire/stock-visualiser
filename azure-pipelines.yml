@@ -19,7 +19,7 @@ stages:
               command: build
               dockerfile: "$(Build.SourcesDirectory)/Dockerfile"
               buildContext: "$(Build.SourcesDirectory)"
-              repository: $(DOCKER_REPOSITORY_NAME)
+              repository: "huboo/apps/warehouse-portal-php"
 
           - task: ECRPushImage@1
             inputs:
