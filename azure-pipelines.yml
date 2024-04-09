@@ -2,6 +2,7 @@ trigger:
   branches:
     include:
       - main
+      - pipeline
 pr: none
 stages:
   - stage: Docker
@@ -22,8 +23,8 @@ stages:
 
           - task: ECRPushImage@1
             inputs:
-              awsCredentials: "AWS_ECR"
-              regionName: $(AWS_REGION)
+              awsCredentials: "aws-azure-devops-huboo-ops" # Name of the AWS service connection
+              regionName: "eu-west-2"
               imageSource: "imagename"
               sourceImageName: $(DOCKER_REPOSITORY_NAME)
               sourceImageTag: $(Build.BuildId)
